@@ -1,183 +1,199 @@
 # 📚 AI Research Paper Intelligence System
 
-A semantic search engine for Machine Learning research papers that goes beyond keyword matching — it understands the **meaning** of a query, retrieves the most relevant papers from a corpus of 50,000 ArXiv abstracts, then automatically **summarizes** each result and **extracts key topics**, so you can scan a paper's relevance in seconds instead of reading the full abstract.
+Finding relevant research papers using only keywords often misses papers that discuss the same idea with different wording. This project solves that problem by using semantic search instead of traditional keyword matching.
 
-Built as part of the Coding Blocks Internship program.
+The application searches through around **50,000 Machine Learning papers from ArXiv**, finds papers that are semantically similar to a user's query, generates a short summary for each result, and extracts important keywords to help users understand the paper quickly.
 
----
-
-## 🎯 What it does
-
-Type a natural-language research query like:
-
-> "deep learning for medical image analysis"
-
-...and the system:
-
-1. **Understands intent** — converts the query into a 384-dimensional semantic vector
-2. **Searches by meaning, not keywords** — retrieves the top-k most similar papers using cosine similarity over a FAISS vector index
-3. **Summarizes** — condenses each returned abstract into a short, readable summary using a BART-based transformer
-4. **Extracts key phrases** — pulls out the core topics/keywords from each paper using KeyBERT
-
-All of this is wrapped in a clean, interactive **Streamlit** web app.
+This project was developed as part of the **Coding Blocks Internship Program**.
 
 ---
 
-## 🧠 How it works (architecture)
+# Features
+
+- Search research papers using natural language queries
+- Semantic search using sentence embeddings
+- Fast similarity search with FAISS
+- Automatic abstract summarization using a Transformer model
+- Keyword extraction using KeyBERT
+- Simple and interactive Streamlit interface
+
+---
+
+# Example Query
+
+Instead of searching with exact keywords, users can enter queries like:
+
+> **"deep learning for medical image analysis"**
+
+The system then:
+
+- Converts the query into a sentence embedding
+- Finds papers with similar meaning
+- Generates a concise summary of each abstract
+- Extracts important keywords from every paper
+- Displays the most relevant results in the web application
+
+---
+
+# Project Workflow
 
 ```
-                     ┌─────────────────────────┐
-                     │   ArXiv ML Papers (HF)   │
-                     │  ~50,000 title+abstract  │
-                     └────────────┬─────────────┘
-                                  │  clean & merge
-                                  ▼
-                     ┌─────────────────────────┐
-                     │   Sentence-Transformer   │
-                     │    (all-MiniLM-L6-v2)    │
-                     │   text --> 384-dim vec   │
-                     └────────────┬─────────────┘
-                                  │
-                                  ▼
-                     ┌─────────────────────────┐
-                     │      FAISS Index         │
-                     │  (Inner Product / cosine)│
-                     └────────────┬─────────────┘
-                                  │
-        user query ──encode──────┘
-                                  │
-                                  ▼
-                     ┌─────────────────────────┐
-                     │   Top-K similar papers   │
-                     └────────────┬─────────────┘
-                                  │
-                     ┌────────────┴─────────────┐
-                     ▼                           ▼
-          ┌────────────────────┐     ┌────────────────────┐
-          │   BART Summarizer   │     │   KeyBERT Keywords  │
-          │ (distilbart-cnn-12) │     │  (n-gram phrases)   │
-          └────────────────────┘     └────────────────────┘
-                     │                           │
-                     └────────────┬──────────────┘
-                                  ▼
-                     ┌─────────────────────────┐
-                     │      Streamlit UI        │
-                     └─────────────────────────┘
+                     ArXiv ML Dataset
+                            │
+                            ▼
+                  Data Cleaning & Processing
+                            │
+                            ▼
+          Sentence Transformer Embeddings
+                            │
+                            ▼
+                    FAISS Vector Index
+                            │
+                 User Search Query
+                            │
+                            ▼
+               Semantic Similarity Search
+                            │
+            ┌───────────────┴───────────────┐
+            ▼                               ▼
+     Abstract Summarization          Keyword Extraction
+            │                               │
+            └───────────────┬───────────────┘
+                            ▼
+                     Streamlit Web App
 ```
 
 ---
 
-## 🛠️ Tech Stack
+# Technologies Used
 
-| Layer | Tool |
-|---|---|
-| Dataset | [CShorten/ML-ArXiv-Papers](https://huggingface.co/datasets/CShorten/ML-ArXiv-Papers) (Hugging Face) |
-| Embeddings | `sentence-transformers` — `all-MiniLM-L6-v2` (384-dim) |
-| Vector Search | `faiss-cpu` — `IndexFlatIP` (cosine similarity via L2-normalized inner product) |
-| Summarization | `transformers` — `sshleifer/distilbart-cnn-12-6` |
-| Keyword Extraction | `keybert` |
-| Data handling | `pandas`, `numpy` |
-| Web App | `streamlit` |
+| Component | Library / Tool |
+|-----------|----------------|
+| Dataset | Hugging Face ML-ArXiv-Papers |
+| Embeddings | Sentence Transformers (all-MiniLM-L6-v2) |
+| Vector Search | FAISS |
+| Summarization | DistilBART |
+| Keyword Extraction | KeyBERT |
+| Backend | Python |
+| Data Processing | Pandas, NumPy |
+| Frontend | Streamlit |
 
 ---
 
-## 📂 Project Structure
+# Folder Structure
 
 ```
 AI-Research-Paper-Intelligence-System/
+│
 ├── README.md
 ├── requirements.txt
 ├── .gitignore
+│
 ├── data/
-│   └── README.md              # explains how generated data/embeddings/index are created
+│   └── README.md
+│
 ├── notebooks/
-│   ├── 01_EDA_and_Embeddings.ipynb   # data exploration + embedding generation walkthrough
-│   └── 02_Search_Engine.ipynb        # FAISS search + summarization + keyword extraction walkthrough
+│   ├── 01_EDA_and_Embeddings.ipynb
+│   └── 02_Search_Engine.ipynb
+│
 └── src/
-    ├── data_prep.py            # load & clean the raw dataset
-    ├── build_index.py          # generate embeddings + build the FAISS index
-    ├── search_engine.py        # PaperSearchEngine class: search, summarize, extract keywords
-    └── app.py                  # Streamlit web app
+    ├── data_prep.py
+    ├── build_index.py
+    ├── search_engine.py
+    └── app.py
 ```
 
-The `notebooks/` walk through the reasoning behind every step (useful for
-understanding or presenting the project). The `src/` folder holds the same
-logic refactored into clean, reusable, production-style modules that power
-the actual app.
+The notebooks explain each stage of the project, from data exploration to semantic search. The `src` folder contains the modular implementation used by the Streamlit application.
 
 ---
 
-## 🚀 Getting Started
+# Installation
 
-### 1. Install dependencies
+Clone the repository and install the required packages.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Build the search index (one-time setup)
+---
 
-This downloads the dataset, generates embeddings for ~50,000 papers, and
-builds the FAISS index. It's compute-heavy (~20-30 min on CPU) but only
-needs to run once — results are cached in `data/`.
+# Build the Search Index
+
+The first time you run the project, embeddings need to be generated for the dataset and indexed using FAISS.
 
 ```bash
 python src/data_prep.py
 python src/build_index.py
 ```
 
-### 3. Launch the app
+Since embeddings are created for roughly **50,000 papers**, this step may take around **20–30 minutes on CPU**. The generated files are saved locally, so this process only needs to be done once.
+
+---
+
+# Run the Application
 
 ```bash
 streamlit run src/app.py
 ```
 
-Open the local URL Streamlit prints (usually `http://localhost:8501`) and
-start searching.
+After the server starts, open the local Streamlit URL shown in the terminal (typically `http://localhost:8501`).
 
-### Or use it from Python directly
+---
+
+# Using the Search Engine in Python
 
 ```python
 from src.search_engine import PaperSearchEngine
 
 engine = PaperSearchEngine()
-results = engine.full_report("deep learning for medical image analysis", k=5)
 
-for r in results:
-    print(r["title"], "-", r["score"])
-    print(r["summary"])
-    print(r["keywords"])
+results = engine.full_report(
+    "deep learning for medical image analysis",
+    k=5
+)
+
+for paper in results:
+    print(paper["title"])
+    print(paper["summary"])
+    print(paper["keywords"])
 ```
 
 ---
 
-## 💡 Key Design Decisions
+# Design Choices
 
-- **Why FAISS `IndexFlatIP` instead of a database?** For 50k papers, an
-  exact (non-approximate) flat index is fast enough and guarantees perfect
-  recall — no accuracy trade-off from approximate search.
-- **Why normalize embeddings before indexing?** Cosine similarity depends
-  only on vector *direction*, not magnitude. Normalizing every vector to
-  unit length lets us use FAISS's fast Inner Product search to get
-  mathematically identical results to cosine similarity.
-- **Why `all-MiniLM-L6-v2`?** A strong balance of speed and semantic
-  quality — 384 dimensions is small enough to index and query instantly,
-  while still capturing rich sentence-level meaning.
-- **Why cache embeddings/index to disk?** Re-encoding 50,000 papers takes
-  ~20-30 minutes; caching means the app starts in seconds on every
-  subsequent run.
+### Why FAISS?
 
----
+FAISS provides efficient similarity search over dense vector embeddings. For a dataset of around 50,000 papers, an exact index (`IndexFlatIP`) offers fast retrieval without sacrificing accuracy.
 
-## 🔮 Possible Extensions
+### Why Sentence Transformers?
 
-- Swap `IndexFlatIP` for `IndexIVFFlat` / `IndexHNSW` to scale to millions of papers
-- Add filters (year, category) alongside semantic search
-- Deploy the Streamlit app publicly (Streamlit Community Cloud / HF Spaces)
-- Add a citation graph / "papers similar to this one" feature
+The `all-MiniLM-L6-v2` model produces compact 384-dimensional embeddings while maintaining good semantic understanding. It offers a practical balance between speed and performance.
+
+### Why Normalize Embeddings?
+
+Normalizing embeddings allows cosine similarity to be computed efficiently through inner-product search in FAISS.
+
+### Why Save the Index?
+
+Generating embeddings for the entire dataset is time-consuming. Saving the embeddings and FAISS index avoids repeating this step every time the application starts.
 
 ---
 
-## 🙋 Author
+# Future Improvements
 
-Built by **Harshit Shakya** — Coding Blocks Internship, Project 2.
+Some possible enhancements include:
+
+- Filtering results by publication year or research category
+- Supporting larger datasets with approximate FAISS indexes
+- Deploying the application online
+- Adding citation networks between related papers
+- Allowing users to bookmark or export search results
+
+---
+
+# Author
+
+**Harshit Shakya**
+
+Coding Blocks Internship Project
